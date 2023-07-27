@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Dashboard</title>
+  <style>
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background-color: #f1f1f1;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #e3f2fd;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      color: #2196f3;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      max-width: 150px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group input[type="radio"] {
+      margin-right: 5px;
+    }
+
+    .form-group .radio-label {
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #2196f3;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .form-group button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2196f3;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .form-group button:hover {
+      background-color: #0c7cd5;
+    }
+
+    .response-container {
+      margin-top: 20px;
+    }
+
+    .response {
+      padding: 10px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      margin-bottom: 10px;
+    }
+
+    .response p {
+      margin: 0;
+      color: #2196f3;
+    }
+    .request-item {
+      padding: 10px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      margin-bottom: 10px;
+    }
+
+    .request-item p {
+      margin: 0;
+      color: #2196f3;
+    }
+    .details-button {
+      background-color: transparent;
+      color: #2196f3;
+      border: none;
+      cursor: pointer;
+    }
+    .alert {
+      padding: 10px;
+      background-color: #f44336;
+      color: white;
+      text-align: center;
+      margin-top: 20px;
+      border-radius: 5px;
+      width: 35%;
+      margin: auto;
+    }
+    .logout-button {
+      padding: 10px;
+      background-color: #f44336;
+      color: white;
+      text-align: center;
+      margin-top: 20px;
+      border-radius: 5px;
+      width: 35%;
+      margin: auto;
+    }
+    .logout-button a {
+      color: white; 
+      text-decoration: none; 
+    }
+    .mt-4 {
+      margin-top: 4rem;    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2><strong>Tableau de bord utilisateur</strong></h2>
+    
+    <!-- Demandes -->
+    <div class="logo">
+        <img src="https://1.bp.blogspot.com/-89KpZslJVQY/XmKzgM5cE9I/AAAAAAAAGy0/N9uS4ENK3XEyqUhpL7c6auwEMY8bv2o3wCLcBGAsYHQ/s1600/ggggggg.png" alt="Ramsa logo">
+    </div>
+    <div id="request-section">
+      <h3>Demandes</h3>
+      <div id="old-requests">
+        {{#each FetchUser}}
+        <div class="request-item">
+          <button class="details-button" onclick="showRequestDetails({{id_demande}})"> <strong>Demande ID {{id_demande}}</strong></button>
+          <div id="request-details-{{id_demande}}" style="display: none;">
+            <p><strong>Date:</strong> {{date_de_demande}}</p>
+            <p><strong>CIN:</strong> {{CIN}}</p>
+            <p><strong>Nom:</strong> {{nom}}</p>
+            <p><strong>Prenom: </strong>{{prenom}}</p>
+            <p><strong>Address: </strong>{{adress}}</p>
+            <p><strong>Telephone: </strong>{{Telephone}}</p>
+            <p><strong>Email: </strong>{{email}}</p>
+          </div>
+        </div>
+        {{/each}}
+        
+        
+
+      </div>
+      <h3>Créer une demande de stage:</h3>
+      <div>
+      {{#if message}}
+        <h4 class="alert alert-danger mt-4"> {{message}} </h4>
+      {{/if }}
+      </div>     
+      <form id="request-form-data" action="/user" method="POST">
+        <div class="form-group">
+          <label for="date_de_demand">Date:</label>
+          <input type="date" id="date_de_demand" name="date_de_demand" >
+        </div>
+        <div class="form-group">
+          <label for="CIN">CIN:</label>
+          <input type="text" id="CIN" name="CIN" >
+        </div>
+        <div class="form-group">
+          <label for="nom">Nom:</label>
+          <input type="text" id="nom" name="nom" >
+        </div>
+        <div class="form-group">
+          <label for="prenom">Prenom:</label>
+          <input type="text" id="prenom" name="prenom" >
+        </div>
+        <div class="form-group">
+          <label for="address">Address:</label>
+          <input type="text" id="address" name="address" >
+        </div>
+        <div class="form-group">
+          <label for="telephone">Telephone:</label>
+          <input type="text" id="telephone" name="telephone" >
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="text" id="email" name="email" >
+        </div>
+        <div class="form-group">
+            <label for="Service">Service</label>
+            <input type="text" id="Service" name="Service" >
+        </div>        
+        <div class="form-group">
+            <label  for="Assurance_ouinon">Avez-vous un Assurance?</label>
+            <input  type="radio" id="Assurance_ouinon" name="Assurance_ouinon" value="1">
+            <label class="radio-label" for="Assurance_ouinon">OUI</label>
+            <input  type="radio" id="Assurance_ouinon" name="Assurance_ouinon" value="0">
+            <label class="radio-label" for="Assurance_ouinon">NON</label>
+        </div>
+        <div class="form-group">
+            <label for="Assurance_compagnie">Assurance compagnie</label>
+            <input type="text" id="Assurance_compagnie" name="Assurance_compagnie" >
+        </div>
+        <div class="form-group">
+          <button type="submit">Envoyer la demande</button>
+        </div>
+      </form>
+    </div>
+ 
+    <!-- Reponse  -->
+    <div id="response-section">
+      <h3>Réponse de l'administrateur</h3>
+      <div class="response-container">
+        {{#each FetchUser}}
+        <div class="response">
+          <p><strong>ID demande: </strong>{{id_demande}}</p>
+          <p><strong>Status: </strong>{{etat_de_demande}}</p>
+         {{#if date_de_debut}} <p><strong>Date de début:</strong> {{date_de_debut}}</p> {{/if}}
+          {{#if date_de_fin}}<p><strong>Date de fin:</strong> {{date_de_fin}} </p>{{/if}}
+          {{#if motif_de_refus}}<p><strong>Motif de refus:</strong> {{motif_de_refus}} </p>{{/if}}
+        </div>
+        {{/each}}
+        
+      </div>
+    </div>
+  </div>
+<div class="logout-button">
+      <a href="/logout"><strong>Logout</strong></a>
+    </div>
+  <script>
+    function showRequestDetails(requestId) {
+      var requestDetails = document.getElementById("request-details-" + requestId);
+      if (requestDetails.style.display === "none") {
+        requestDetails.style.display = "block";
+      } else {
+        requestDetails.style.display = "none";
+      }
+    }
+
+
+
+
+  </script>
+</body>
+</html>
