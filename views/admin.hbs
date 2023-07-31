@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Dashboard</title>
+  <title>Tableau de board de l'administrateur</title>
   <style>
     body {
       font-family: "Helvetica Neue", Arial, sans-serif;
@@ -137,6 +137,7 @@
         <p><strong>Address:</strong> {{adress}}</p>
         <p><strong>Telephone:</strong> {{Telephone}}</p>
         <p><strong>Email:</strong> {{email}}</p>
+        <p><strong>Ecole ou Universite : </strong>{{Nom_Ecole}} </p>
         <form class="response-form" action="/admin" method="POST">
           <input type="hidden" name="id_demande" value="{{id_demande}}">
           <div class="form-group">
@@ -146,7 +147,7 @@
           <div class="form-group">
             <label for="end_date"> Date de fin:</label>
             <input type="date" id="end_date" name="end_date" required>
-          </div>g
+          </div>
           <div class="form-group">
             <button type="submit"><strong>Accepter</strong></button>
           </div>

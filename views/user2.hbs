@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>User Dashboard</title>
+  <title>Tableau de bord utilisateur</title>
   <style>
     body {
       font-family: "Helvetica Neue", Arial, sans-serif;
@@ -15,6 +15,16 @@
       background-color: #e3f2fd;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    select {
+      width: 200px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      color: #333;
+      cursor: pointer;
     }
 
     h2 {
@@ -149,7 +159,7 @@
       <h3>Demandes</h3>
       <div id="old-requests">
         {{#each FetchUser}}
-        <div class="request-item">
+        <div class="request-item"> 
           <button class="details-button" onclick="showRequestDetails({{id_demande}})"> <strong>Demande ID {{id_demande}}</strong></button>
           <div id="request-details-{{id_demande}}" style="display: none;">
             <p><strong>Date:</strong> {{date_de_demande}}</p>
@@ -158,7 +168,8 @@
             <p><strong>Prenom: </strong>{{prenom}}</p>
             <p><strong>Address: </strong>{{adress}}</p>
             <p><strong>Telephone: </strong>{{Telephone}}</p>
-            <p><strong>Email: </strong>{{email}}</p>
+            <p><strong>Email: </strong>{{email}}</p> 
+            <p><strong>Ecole ou Universite : </strong>{{Nom_Ecole}} </p>
           </div>
         </div>
         {{/each}}
@@ -201,6 +212,21 @@
           <label for="email">Email:</label>
           <input type="text" id="email" name="email" >
         </div>
+        <div class="form-group">
+          <label for="Ecole">école ou université:</label>
+          <select id="Ecole" name="Ecole">
+            <option value="1">ENSA Agadir</option>
+            <option value="2">EST Agadir</option>
+            <option value="3">OFPPT Agadir</option>
+            <option value="4">Faculté des Sciences Ibnu Zohr Agadir</option>
+            <option value="5">FSJES Ibnu Zohr Agadir</option>
+            <option value="6">Universiapolis Agadir</option>
+            <option value="7">ENCG Agadir</option>
+            <option value="8">FLSH Agadir</option>
+            <option value="9">BTS Agadir</option>
+          </select>
+
+        </div>            
         <div class="form-group">
             <label for="Service">Service</label>
             <input type="text" id="Service" name="Service" >

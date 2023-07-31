@@ -105,17 +105,21 @@ exports.isLoggedIn = async (req, res, next) => {
 // Fonction pour créer une nouvelle demande par l'utilisateur
 exports.postUser = async (req, res) => {
     // Récupération des données du formulaire pour créer une demande
-    const { date_de_demande, CIN, nom, prenom, address, telephone, email, Service, Assurance_ouinon, Assurance_compagnie } = req.body;
+try{    
+    
+    const { date_de_demand, CIN, nom, prenom, address, telephone, email, Ecole ,Service, Assurance_ouinon, Assurance_compagnie } = req.body;
     const AssuranceINT = Assurance_ouinon * 1;
+    const EcoleINT= Ecole*1
+    console.log( { date_de_demand, CIN, nom, prenom, address, telephone, email, Ecole ,Service, Assurance_ouinon, Assurance_compagnie } )
 
-    if (!date_de_demande || !CIN || !nom || !prenom || !address || !telephone || !email || !Service || !Assurance_ouinon || !Assurance_compagnie) {
+    if (!date_de_demand || !CIN || !nom || !prenom || !address || !telephone || !email || !Service || !Assurance_ouinon || !Assurance_compagnie || !Ecole) {
         // Vérification si tous les champs du formulaire sont remplis
         res.status(400).render("user2", {
             message: "Veuillez remplir tout le formulaire !"
         });
     } else {
         // Insertion des données de la demande dans la base de données
-        db.query("INSERT into demandes SET ?", [{ date_de_demande: date_de_demand, nom, prenom, adress: address, Telephone: telephone, email, Assurance: AssuranceINT, compagnie_assurance: Assurance_compagnie, Service, etat_de_demande: "instance", CIN }], async (err, results) => {
+        db.query("INSERT into demandes SET ?", [{ date_de_demande: date_de_demand, nom, prenom, adress: address, Telephone: telephone, email, Assurance: AssuranceINT, compagnie_assurance: Assurance_compagnie, Service, etat_de_demande: "instance", CIN ,id_ecole: EcoleINT }], async (err, results) => {
             if (err) {
                 console.log(err);
                 res.status(500).render("user2", {
@@ -128,6 +132,13 @@ exports.postUser = async (req, res) => {
                 });
             }
         });
+    }}
+    catch(error){
+        console.log(error);
+                res.status(500).render("user2", {
+                    message: "Le formulaire n'est pas soumis, réessayez plus tard !"
+                });
+
     }
 };
 
@@ -147,7 +158,44 @@ exports.FetchUser = async (req, res, next) => {
         if (!results_FetchUser || results_FetchUser.length === 0) {
             return next();
         } else {
-            req.FetchUser = results_FetchUser;
+          
+            try {
+                //table ecole
+
+                const results_FetchUser_Ecole = await new Promise((resolve, reject) => {
+                    db.query("SELECT * from ecole", (err, results) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(results);
+                        }
+                    });
+                });  
+                // construire une liste qui contient les id_ecoles des demands instance et 
+                const id_ecoles = results_FetchUser.map((row) => row.id_ecole);
+                //construire un object key:value d'apres la table ecolee
+                const resultsObject = results_FetchUser_Ecole.reduce((acc, row) => {
+                    acc[row.id_ecole] = row.libelle;
+                    return acc;
+                  }, {});
+                // obtenir les nom des des ecole d apres leurs id  
+                const Nom_Ecole = id_ecoles.map((id) => resultsObject[id]); 
+                
+                
+                // Attribuez nom_ecole à chaque objet results_FetchUser en fonction de son id_ecole
+
+                results_FetchUser.forEach((user, index) => {
+                    user.Nom_Ecole = Nom_Ecole[index];
+                });
+                
+                req.FetchUser = results_FetchUser;
+                
+                return next()
+            } catch (error) {
+                console.log(error)
+                return next()
+                
+            }
             return next();
         }
     } catch (error) {
@@ -169,11 +217,48 @@ exports.FetchDemande = async (req, res, next) => {
                 }
             });
         });
-
+        
         if (!results_FetchDemande || results_FetchDemande.length === 0) {
             return next();
         } else {
-            req.FetchDemande = results_FetchDemande;
+            try {
+                //table ecole
+
+                const results_FetchUser_Ecole = await new Promise((resolve, reject) => {
+                    db.query("SELECT * from ecole", (err, results) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(results);
+                        }
+                    });
+                });  
+                // construire une liste qui contient les id_ecoles des demands instance et 
+                const id_ecoles = results_FetchDemande.map((row) => row.id_ecole);
+                //construire un object key:value d'apres la table ecolee
+                const resultsObject = results_FetchUser_Ecole.reduce((acc, row) => {
+                    acc[row.id_ecole] = row.libelle;
+                    return acc;
+                  }, {});
+                // obtenir les nom des des ecole d apres leurs id  
+                const Nom_Ecole = id_ecoles.map((id) => resultsObject[id]); 
+                
+                
+                // Attribuez nom_ecole à chaque objet results_FetchUser en fonction de son id_ecole
+
+                results_FetchDemande.forEach((user, index) => {
+                    user.Nom_Ecole = Nom_Ecole[index];
+                });
+                
+                req.FetchDemande = results_FetchDemande;
+                
+                return next()
+            } catch (error) {
+                console.log(error)
+                return next()
+                
+            }
+            
             return next();
         }
     } catch (error) {
@@ -224,3 +309,83 @@ exports.logout = async (req, res) => {
     });
     res.status(302).redirect("/login");
 };
+
+exports.chart=async(req,res,next)=>{
+try {
+
+    //PIE CHART DATA (les taux de demandes accepter / refuser/ pas repondu)
+
+    const results_chart = await new Promise((resolve, reject) => {
+        db.query("SELECT etat_de_demande, COUNT(*) AS count FROM demandes GROUP BY etat_de_demande ", (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        });
+    });
+    // Calculer le nombre total de demandes
+    const totalCount = results_chart.reduce((total, row) => total + row.count, 0);
+    // Calculer les pourcentages pour chaque valeur de "etat_de_demande"
+    results_chart.forEach(row => {
+        row.percentage = ((row.count / totalCount) * 100).toFixed(2);
+    });
+    req.results_chart=results_chart
+
+
+
+    // VERTICAL BAR DATA (les taux des ecoles dans les demands)
+    const results_chart2 = await new Promise((resolve, reject) => {
+        db.query("SELECT id_ecole, COUNT(*) AS count FROM demandes GROUP BY id_ecole ", (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        });
+    });
+    //table ecole
+
+    const results_FetchUser_Ecole = await new Promise((resolve, reject) => {
+        db.query("SELECT * from ecole", (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results);
+            }
+        });
+    });  
+    // construire une liste qui contient les id_ecoles des demands instance et 
+    const id_ecoles = results_chart2.map((row) => row.id_ecole);
+    //construire un object key:value d'apres la table ecolee
+    const resultsObject = results_FetchUser_Ecole.reduce((acc, row) => {
+        acc[row.id_ecole] = row.libelle;
+        return acc;
+      }, {});
+    // obtenir les nom des des ecole d apres leurs id  
+    const Nom_Ecole = id_ecoles.map((id) => resultsObject[id]); 
+    const totalCount2 = results_chart2.reduce((total, row) => total + row.count, 0);
+    const resultsArray = results_chart2.map((item) => {
+        const id_ecole = item.id_ecole;
+        const nom_ecole = resultsObject[id_ecole];
+        const countt = item.count/totalCount2 * 100;
+        return { nom_ecole, countt };
+    });
+      
+    
+    
+    req.results_chart2=resultsArray
+    
+
+  
+
+} catch (error) {
+    console.log(error)
+    res.status(500).render("statistic", {
+        message: "Erreur interne du serveur :("
+    });
+
+    return next()
+}
+    next()
+}

@@ -21,10 +21,22 @@ router.post("/admin",AUTHcontroller.postAdmin);
 
 //requetes GET
 
+router.get("/admin/statistiques",AUTHcontroller.isLoggedIn,AUTHcontroller.chart,(req, res)=>{
+  if (!req.user || req.user.length === 0 || req.user.type !== "admin") {
+    return res.status(403).send(error400);
+  }
+
+ 
+  res.render("statistic",{
+    demandeData: JSON.stringify(req.results_chart),
+    ecoleData: JSON.stringify(req.results_chart2)})
+})
+
 router.get("/admin", AUTHcontroller.isLoggedIn, AUTHcontroller.FetchDemande, (req, res) => {
   if (!req.user || req.user.length === 0 || req.user.type !== "admin") {
     return res.status(403).send(error400);
   }
+  
   res.render("admin",{
     FetchDemande:req.FetchDemande})
 });
@@ -33,6 +45,7 @@ router.get("/user", AUTHcontroller.isLoggedIn,AUTHcontroller.FetchUser, (req, re
   if (!req.user || req.user.length === 0 || req.user.type !== "user") {
     return res.status(403).send(error400);
   }
+  
   res.render("user2",{
     FetchUser: req.FetchUser
   });
@@ -56,6 +69,9 @@ router.get("/",(req,res)=>{
   res.status(302).redirect("/login")
 })
 
+router.all("*", (req, res) => {
+  res.status(404).send("<h1>404 Not Found</h1><br><hr><strong>Oops! The requested resource does not exist.</strong>");
+});
 
 
 

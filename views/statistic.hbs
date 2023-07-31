@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Statistiques</title>
+  <style>
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background-color: #f1f1f1;
+      text-align: center
+      align-items: center; 
+      justify-content: center; 
+      height: 100vh;
+    }
+
+    h1 {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      text-align: center;
+      margin-top: 0;
+      color: #07589b;
+      margin-bottom: 20px;
+    }
+    
+    h3 {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      text-align: center;
+      margin-top: 0;
+      color: #2196f3;
+      margin-bottom: 20px;
+    }
+    .chart-container {
+      display: flex;
+      justify-content: space-around;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #e3f2fd;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Statistiques des demandes</h1>
+  <h3>Statistiques par États de Demande</h3>
+  <div class="chart-container">
+      
+      <canvas id="demandesChart" width="300" height="200"></canvas>
+   </div>
+   <h3><strong> Statistiques par Écoles</strong></h3>
+   <div class="chart-container">
+      
+      <canvas id="ecolesChart" width="300" height="200"></canvas>
+    </div>
+  </div>
+  <script>
+     // Passer les données de demande du serveur au JavaScript côté client
+    const demandeData = {{{demandeData}}};
+    const ecoleData = {{{ecoleData}}};
+
+    const labels = demandeData.map(item => item.etat_de_demande);
+    const percentages = demandeData.map(item => item.percentage);
+
+    const ecoleLabels = ecoleData.map(item => item.nom_ecole);
+    const ecolePercentages = ecoleData.map(item => item.countt);
+    // Statistiques par États de Demande
+    const ctx = document.getElementById('demandesChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: percentages,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            // Ajouter plus de couleurs si nécessaire pour des catégories supplémentaires
+          ],
+        }],
+      },
+    });
+    //Statistiques par Écoles 
+    const ecoleCtx = document.getElementById('ecolesChart').getContext('2d');
+    const ecoleChart = new Chart(ecoleCtx, {
+      type: 'bar',
+      data: {
+        labels: ecoleLabels,
+        datasets: [{
+          label: 'Pourcentage des Écoles dans les Demandes',
+          data: ecolePercentages,
+          backgroundColor: 'rgba(255, 99, 132, 0.8)',
+        }],
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: value => `${value}%`,
+            },
+          },
+        },
+      },
+    });
+
+  </script>
+</body>
+</html>
+
