@@ -6,6 +6,12 @@ const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 const { promisify } = require("util");
 const { Console } = require("console");
+const nodemailer = require('nodemailer');
+const sendMailModule = require("./utils/SendMail")
+const template= require("./templates/ActivateMail");
+const DF=require("./utils/FormatDate")
+const { start } = require("repl");
+
 dotenv.config();
 
 // Connexion à la base de données MySQL
@@ -15,9 +21,19 @@ const db = mysql.createConnection({
     password: process.env.DB_PASS,
     database: process.env.DB
 });
+//
+const transporter = nodemailer.createTransport({
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS
+    }
+  });
 
 // Fonction de connexion pour l'utilisateur
 exports.login = async (req, res) => {
+    
     // Récupération du CIN et du mot de passe depuis la requête
     const { CIN, mot_de_passe } = req.body;
 
@@ -34,7 +50,12 @@ exports.login = async (req, res) => {
                     res.status(400).render("login", {
                         message: "CIN ou mot de passe invalide"
                     });
-                } else {
+                }else if(!results[0].is_verified) {
+                    res.status(400).render("login", {
+                        message: "Verifier Votre Compte!"
+                    });
+                }
+                else {
                     // Création du token JWT pour l'utilisateur connecté
                     const CIN_id = results[0].CIN;
                     const type = results[0].type;
@@ -87,6 +108,7 @@ exports.isLoggedIn = async (req, res, next) => {
                 if (!results_isLoggedIn || results_isLoggedIn.length === 0) {
                     return next();
                 } else {
+
                     req.user = results_isLoggedIn[0];
                     return next();
                 }
@@ -106,20 +128,21 @@ exports.isLoggedIn = async (req, res, next) => {
 exports.postUser = async (req, res) => {
     // Récupération des données du formulaire pour créer une demande
 try{    
-    
-    const { date_de_demand, CIN, nom, prenom, address, telephone, email, Ecole ,Service, Assurance_ouinon, Assurance_compagnie } = req.body;
+    const { Ecole ,Service, Assurance_ouinon, Assurance_compagnie } = req.body;
     const AssuranceINT = Assurance_ouinon * 1;
     const EcoleINT= Ecole*1
-    console.log( { date_de_demand, CIN, nom, prenom, address, telephone, email, Ecole ,Service, Assurance_ouinon, Assurance_compagnie } )
+    const date_de_demand= new Date()
+    
 
-    if (!date_de_demand || !CIN || !nom || !prenom || !address || !telephone || !email || !Service || !Assurance_ouinon || !Assurance_compagnie || !Ecole) {
+
+    if (!date_de_demand ||  !Service || !Assurance_ouinon || !Assurance_compagnie || !Ecole) {
         // Vérification si tous les champs du formulaire sont remplis
         res.status(400).render("user2", {
             message: "Veuillez remplir tout le formulaire !"
         });
     } else {
         // Insertion des données de la demande dans la base de données
-        db.query("INSERT into demandes SET ?", [{ date_de_demande: date_de_demand, nom, prenom, adress: address, Telephone: telephone, email, Assurance: AssuranceINT, compagnie_assurance: Assurance_compagnie, Service, etat_de_demande: "instance", CIN ,id_ecole: EcoleINT }], async (err, results) => {
+        db.query("INSERT into demandes SET ?", [{ date_de_demande: date_de_demand,  Assurance: AssuranceINT, compagnie_assurance: Assurance_compagnie, Service, etat_de_demande: "instance", CIN:req.user.CIN ,id_ecole: EcoleINT }], async (err, results) => {
             if (err) {
                 console.log(err);
                 res.status(500).render("user2", {
@@ -188,8 +211,14 @@ exports.FetchUser = async (req, res, next) => {
                     user.Nom_Ecole = Nom_Ecole[index];
                 });
                 
-                req.FetchUser = results_FetchUser;
                 
+                for (const item of results_FetchUser) {
+                    item.date_de_demande = DF.DateFormat(item.date_de_demande);
+                    item.date_de_debut = DF.DateFormat(item.date_de_debut);
+                    item.date_de_fin = DF.DateFormat(item.date_de_fin);
+
+                }
+                req.FetchUser = results_FetchUser;
                 return next()
             } catch (error) {
                 console.log(error)
@@ -250,8 +279,34 @@ exports.FetchDemande = async (req, res, next) => {
                     user.Nom_Ecole = Nom_Ecole[index];
                 });
                 
-                req.FetchDemande = results_FetchDemande;
+               
+                UserCin =results_FetchDemande.map((value)=>value.CIN)
                 
+                let UserInfo= []
+                for(let i =0 ; i<UserCin.length ; i++){
+                let results_FetchDemande_user = await new Promise((resolve, reject) => {
+                    db.query("SELECT nom,prenom,adress,Telephone,email from utilisateur where CIN = ?",[UserCin[i]], (err, results) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(results);
+                        }
+                    });
+                })
+                UserInfo.push(results_FetchDemande_user)
+            }
+                results_FetchDemande.forEach((user, index) => {
+                    user.nom = UserInfo[index][0].nom;
+                    user.prenom = UserInfo[index][0].prenom;
+                    user.adress = UserInfo[index][0].adress;
+                    user.Telephone = UserInfo[index][0].Telephone;
+                    user.email = UserInfo[index][0].email;
+                });
+
+                for (const item of results_FetchDemande) {
+                    item.date_de_demande = DF.DateFormat(item.date_de_demande);}
+
+                req.FetchDemande = results_FetchDemande;
                 return next()
             } catch (error) {
                 console.log(error)
@@ -312,11 +367,18 @@ exports.logout = async (req, res) => {
 
 exports.chart=async(req,res,next)=>{
 try {
+    let startDate = "2023-01-01";
+    let endDate= "2023-12-12"; 
+    console.log(req.query)
+    if (req.query.start_date && req.query.end_date){
+        startDate=req.query.start_date
+        endDate=req.query.end_date
+    }
 
     //PIE CHART DATA (les taux de demandes accepter / refuser/ pas repondu)
 
     const results_chart = await new Promise((resolve, reject) => {
-        db.query("SELECT etat_de_demande, COUNT(*) AS count FROM demandes GROUP BY etat_de_demande ", (err, results) => {
+        db.query("SELECT etat_de_demande, COUNT(*) AS count FROM demandes WHERE date_de_demande BETWEEN ? AND ? GROUP BY etat_de_demande",[startDate, endDate],  (err, results) => {
             if (err) {
                 reject(err);
             } else {
@@ -324,6 +386,7 @@ try {
             }
         });
     });
+    console.log(results_chart)
     // Calculer le nombre total de demandes
     const totalCount = results_chart.reduce((total, row) => total + row.count, 0);
     // Calculer les pourcentages pour chaque valeur de "etat_de_demande"
@@ -336,7 +399,7 @@ try {
 
     // VERTICAL BAR DATA (les taux des ecoles dans les demands)
     const results_chart2 = await new Promise((resolve, reject) => {
-        db.query("SELECT id_ecole, COUNT(*) AS count FROM demandes GROUP BY id_ecole ", (err, results) => {
+        db.query("SELECT id_ecole, COUNT(*) AS count FROM demandes WHERE date_de_demande BETWEEN ? AND ?  GROUP BY id_ecole ",[startDate, endDate], (err, results) => {
             if (err) {
                 reject(err);
             } else {
@@ -389,3 +452,63 @@ try {
 }
     next()
 }
+
+exports.register = async (req, res) => {
+    console.log(req.body);
+  
+    const { CIN, Prenom, nom, Email, adress, Telephone, mot_de_passe, mot_de_passe_confirme } = req.body;
+
+    if (!CIN || !Prenom || !nom || !Email || !adress || !Telephone || !mot_de_passe || !mot_de_passe_confirme) {
+        res.status(400).render("register", {
+            message: "Veuillez remplir tout le formulaire !"
+        });
+    } else {
+        try {
+            db.query('SELECT email,CIN FROM utilisateur WHERE email = ? OR CIN=?', [Email, CIN], async (error, results) => {
+                if (error) {
+                    console.log(error);
+                }
+
+                if (results.length > 0) {
+                    return res.render('register', {
+                        message: 'Email ou CIN est déjà utilisé'
+                    });
+                } else if (mot_de_passe !== mot_de_passe_confirme) {
+                    return res.render('register', {
+                        message: 'Les mots de passe ne correspondent pas'
+                    });
+                }
+
+                let hashedPassword = await bcrypt.hash(mot_de_passe, 12);
+                // Création du token JWT pour l'utilisateur connecté
+                const CIN_id = CIN;
+                const type = "user";
+                const token = jwt.sign({ CIN_id, type }, process.env.JWT_SECRET, {
+                    expiresIn: process.env.JWT_EXPIRES
+                });
+
+                try {
+                    await db.query('INSERT INTO utilisateur SET ?', { nom: nom, prenom: Prenom, adress: adress, Telephone: Telephone, email: Email, mot_de_passe: hashedPassword, CIN: CIN, type: "user", jwt_token: token });
+                    
+                    const url = `http://localhost:8080/verify/${token}`;
+                    
+                    await sendMailModule.sendMail(Email, url,template);
+
+                    return res.render('register', {
+                        message: 'Un lien de vérification a été envoyé à votre adresse e-mail.'
+                    });
+                } catch (error) {
+                    console.log(error);
+                    return res.render('register', {
+                        message: 'Une erreur s\'est produite lors de l\'enregistrement.'
+                    });
+                }
+            });
+        } catch (error) {
+            console.log(error);
+            return res.render('register', {
+                message: 'Une erreur s\'est produite.'
+            });
+        }
+    }
+};

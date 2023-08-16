@@ -9,7 +9,8 @@ const router = require("./route")
 const path = require("path")
 const cookieparser = require("cookie-parser")
 const { engine } = require("express-handlebars")
-
+const MomentHandler = require("handlebars.moment");
+const Handlebars = require("handlebars");
 // Configuration de la connexion à la base de données MySQL
 const db= mysql.createConnection({
     host: process.env.DB_HOST,
@@ -34,15 +35,26 @@ app.use(express.urlencoded({extended:true}));
 app.use(cors());
 app.use(cookieparser())
 
+
+
+
 //utilisation 
 app.engine("handlebars", engine({ extname:".hbs",
     defaultLayout: false,
-    layoutsDir:"views"
+    layoutsDir:"views",
+    helpers:{
+        formatDate: function(datetime, format){
+            return moment(datetime).format(format);
+        }
+
+    
+    }
 }));
 // Configuration du moteur de templates Handlebars HBS
-app.use(express.static("public"))
 app.set("views",path.join(__dirname,"views"))
 app.set("view engine","hbs");
+app.use(express.static(path.join(__dirname, 'public')))
+
 
 
 //routes

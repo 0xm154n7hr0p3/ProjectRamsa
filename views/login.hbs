@@ -1,122 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Sign Up</title>
-  <style>
-    body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      background-color: #f1f1f1;
-      align-items: center; 
-      justify-content: center; 
-      height: 100vh;
-    }
+    <base href="/" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-    .container {
-      max-width: 400px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #e3f2fd;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
+    <title>SB Admin 2 - Login</title>
 
-    h2 {
-      text-align: center;
-      margin-top: 0;
-      color: #2196f3;
-      font-family: "Georgia", serif;
-    }
+    <!-- Custom fonts for this template-->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
 
-    .logo {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    <!-- Custom styles for this template-->
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
-    .logo img {
-      max-width: 150px;
-    }
+    <style>
+        body {
+            background: linear-gradient(to right, #4e73df, #b1c4fc);
+        }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 93vh;
+        }
 
-    .form-group label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #2196f3;
-      font-family: "Arial", sans-serif;
-    }
+        .card {
+            max-width: 400px;
+            width: 100%;
+        }
 
-    .form-group input {
-      width: 90%;
-      padding: 10px;
-      padding-right: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-family: "Courier New", monospace;
-    }
+       
+        .logo {
+            max-width: 110px; 
+           
+        }
+    </style>
 
-    .form-group button {
-      width: 100%;
-      padding: 10px;
-      background-color: #2196f3;
-      color: #fff;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      font-family: "Verdana", sans-serif;
-    }
-
-    .form-group button:hover {
-      background-color: #0c7cd5;
-    }
-    
-    .alert {
-      padding: 10px;
-      background-color: #f44336;
-      color: white;
-      text-align: center;
-      margin-top: 20px;
-      border-radius: 5px;
-      width: 35%;
-      margin: auto;
-    }
-
-    .mt-4 {
-      margin-top: 4rem;}
-  </style>
-    
 </head>
+
 <body>
-  <div class="container">
-    <div class="logo">
-      <img src="https://1.bp.blogspot.com/-89KpZslJVQY/XmKzgM5cE9I/AAAAAAAAGy0/N9uS4ENK3XEyqUhpL7c6auwEMY8bv2o3wCLcBGAsYHQ/s1600/ggggggg.png" alt="Ramsa Logo">
+
+    <div class="container">
+
+        <div class="card o-hidden border-0 shadow-lg">
+            <div class="card-body p-0">
+                <div class="p-5">
+                    <!-- Logo added here -->
+                    <div class="text-center mb-4">
+                        <img src="/img/ramsa.png" alt="Logo" class="logo">
+                    </div>
+                    <div class="text-center">
+                        <h1 class="h4 text-gray-900 mb-4">Bienvenue !</h1>
+                    </div>
+                    <form class="user"  action="/login" method="POST">
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-user" id="CIN" name="CIN"
+                             placeholder="Entrez votre CIN ">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control form-control-user" id="mot_de_passe" name="mot_de_passe"
+                                placeholder="Mot de Passe">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                            Login
+                        </button>
+
+                    </form>
+                    <hr>
+
+                    <div class="text-center">
+                        <a class="small" href="/register">Créer un compte!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-    <h2>Sign Up</h2>
-    <form id="signup-form" action="/auth/login" method="POST">
-      <div class="form-group">
-        <label for="CIN">CIN:</label>
-        <input type="text" id="CIN" name="CIN" >
-      </div>
-      <div class="form-group">
-        <label for="mot_de_passe">Mot de passe:</label>
-        <input type="password" id="mot_de_passe" name="mot_de_passe">
-      </div>
-      <div class="form-group">
-        <button type="submit">Sign Up</button>
-      </div>
-    </form>
-  </div>
-<div>
+    <div>
 
-  {{#if message}}
-
-    <h4 class="alert alert-danger mt-4">{{message}}</h4>
-  {{/if}}
-
+<div class="text-center" > 
+    {{#if message}}
+        <div class="centered-message">
+            <h4 class="btn btn-danger btn-icon-split">
+                <span class="icon text-white-50">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </span>
+                <span class="text">{{message}}</span>
+            </h4>
+        </div>
+    {{/if}}
 </div>
 
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="js/sb-admin-2.min.js"></script>
+
 </body>
+
 </html>
