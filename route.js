@@ -6,6 +6,8 @@ const { route } = require("./app");
 const error400="<h1>403 Forbidden</h1><br><hr><strong>Oops! Vous n'êtes pas autorisé à accéder à cette page.</strong>"
 const verify=require("./utils/VerifyToken")
 const csrf = require('csurf');
+const rateLimit = require('express-rate-limit')
+
 
 
 
