@@ -347,7 +347,7 @@ exports.postAdmin = async (req, res) => {
         } else {
             status = "refusé";
         }
-
+        if((start_date && end_date) || refuse_reaseon){
         // Mise à jour du statut de la demande (validée ou refusée) dans la base de données
         db.query("UPDATE demandes SET ? where id_demande = ?", [{ date_de_debut: start_date, date_de_fin: end_date, etat_de_demande: status , motif_de_refus:refuse_reaseon }, id_demande], (err, results) => {
             if (err) {
@@ -361,7 +361,12 @@ exports.postAdmin = async (req, res) => {
                     message: "Formulaire est soumis ! :)"
                 });
             }
-        });
+        });}
+        else{
+            res.status(200).render("admin",{
+                message:"Veuillez remplir toute le formuliare!!!"
+            })
+        }
     } catch (error) {
         console.log(error);
     }

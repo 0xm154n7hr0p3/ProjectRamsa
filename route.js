@@ -78,19 +78,21 @@ router.get("/admin", AUTHcontroller.isLoggedIn,csrfProtect, AUTHcontroller.Fetch
   nom = req.user.nom
   prenom= req.user.prenom
   
-  let FetchDemande= {
-    ...req.FetchDemande,  // spread the existing properties if any
-    csrfToken: req.csrfToken()
+  let FetchDemande = { ...req.FetchDemande };
+
+  // Loop through each property in FetchDemande
+  for (const key in FetchDemande) {
+    // Check if the property is an object and not null
+    if (FetchDemande[key] !== null && typeof FetchDemande[key] === 'object') {
+      // Add csrfToken property to the object
+      FetchDemande[key].csrfToken = req.csrfToken();
+    }
   }
   console.log(FetchDemande)
   res.render("admin",{
-    FetchDemande: {
-      ...req.FetchDemande,  // spread the existing properties if any
-      csrfToken: req.csrfToken()
-    },
+    FetchDemande,
     nom,
     prenom,
-    csrfToken: req.csrfToken()
   })
 });
 
