@@ -7,10 +7,17 @@ dotenv.config();
 const port = process.env.PORT ;
 const router = require("./route")
 const path = require("path")
+const helmet = require('helmet');
 const cookieparser = require("cookie-parser")
 const { engine } = require("express-handlebars")
 const MomentHandler = require("handlebars.moment");
 const Handlebars = require("handlebars");
+const hpp = require('hpp');
+const xssMiddleware=require("./utils/xssMiddleware");
+const rateLimit = require('express-rate-limit');
+
+
+
 // Configuration de la connexion à la base de données MySQL
 const db= mysql.createConnection({
     host: process.env.DB_HOST,
@@ -29,11 +36,23 @@ db.connect((err)=>{
     }
 })
 
+// Create a rate limiter middleware
+const limiter = rateLimit({
+    windowMs: 30 * 60 * 1000, // 30 minutes
+    max: 35, // limit each IP to 3 requests per windowMs
+    message:'<h1>429 Too Many Requests</h1><br><hr><strong>Oops ! Vous avez dépassé la limite de fréquence. Veuillez réessayer plus tard.</strong>',
+    headers: true,
+  });
+
 //middleware
-app.use(express.json());
+app.use(express.json({ limit: '5kb' }));
 app.use(express.urlencoded({extended:true}));
 app.use(cors());
-app.use(cookieparser())
+app.use(cookieparser());
+app.use( helmet({ contentSecurityPolicy: false, }) )
+app.use(hpp());
+app.use(xssMiddleware)
+app.use(limiter)
 
 
 

@@ -11,6 +11,11 @@ const sendMailModule = require("./utils/SendMail")
 const template= require("./templates/ActivateMail");
 const DF=require("./utils/FormatDate")
 const { start } = require("repl");
+const validator = require('validator');
+const { JSDOM } = require('jsdom');
+const window = new JSDOM('').window;
+const createDOMPurify = require('dompurify');
+const DOMPurify = createDOMPurify(window);
 
 dotenv.config();
 
@@ -44,6 +49,7 @@ exports.login = async (req, res) => {
                 message: "Veuillez fournir le CIN et le mot de passe"
             });
         } else {
+            try{
             // Vérification des informations d'identification dans la base de données
             db.query("SELECT * FROM utilisateur WHERE CIN = ?", [CIN], async (err, results) => {
                 if (!results || results.length === 0 || !(await bcrypt.compare(mot_de_passe, results[0].mot_de_passe))) {
@@ -83,6 +89,10 @@ exports.login = async (req, res) => {
                 }
             });
         }
+        catch(err){
+            res.status(400).redirect("/login")
+        }}
+       
     } catch (err) {
         console.log(err);
     }
@@ -128,12 +138,12 @@ exports.isLoggedIn = async (req, res, next) => {
 exports.postUser = async (req, res) => {
     // Récupération des données du formulaire pour créer une demande
 try{    
-    const { Ecole ,Service, Assurance_ouinon, Assurance_compagnie } = req.body;
+    let { Ecole ,Service, Assurance_ouinon, Assurance_compagnie } = req.body;
     const AssuranceINT = Assurance_ouinon * 1;
     const EcoleINT= Ecole*1
     const date_de_demand= new Date()
-    
 
+    console.log({ Ecole ,Service, Assurance_ouinon, Assurance_compagnie })
 
     if (!date_de_demand ||  !Service || !Assurance_ouinon || !Assurance_compagnie || !Ecole) {
         // Vérification si tous les champs du formulaire sont remplis
@@ -141,6 +151,9 @@ try{
             message: "Veuillez remplir tout le formulaire !"
         });
     } else {
+        
+
+
         // Insertion des données de la demande dans la base de données
         db.query("INSERT into demandes SET ?", [{ date_de_demande: date_de_demand,  Assurance: AssuranceINT, compagnie_assurance: Assurance_compagnie, Service, etat_de_demande: "instance", CIN:req.user.CIN ,id_ecole: EcoleINT }], async (err, results) => {
             if (err) {
@@ -374,6 +387,7 @@ try {
         startDate=req.query.start_date
         endDate=req.query.end_date
     }
+    if (validator.isDate(startDate)|| validator.isDate(endDate)){
 
     //PIE CHART DATA (les taux de demandes accepter / refuser/ pas repondu)
 
@@ -439,7 +453,7 @@ try {
     
     req.results_chart2=resultsArray
     
-
+    }
   
 
 } catch (error) {
@@ -456,13 +470,42 @@ try {
 exports.register = async (req, res) => {
     console.log(req.body);
   
-    const { CIN, Prenom, nom, Email, adress, Telephone, mot_de_passe, mot_de_passe_confirme } = req.body;
+   const { CIN, Prenom, nom, Email, adress, Telephone, mot_de_passe, mot_de_passe_confirme } = req.body;
+
 
     if (!CIN || !Prenom || !nom || !Email || !adress || !Telephone || !mot_de_passe || !mot_de_passe_confirme) {
         res.status(400).render("register", {
             message: "Veuillez remplir tout le formulaire !"
         });
-    } else {
+    } 
+    const errors = [];
+    if (!validator.isEmail(Email)) {
+        errors.push('Adresse e-mail invalide.');
+      }
+    
+      // Validate phone number
+      if (!validator.isMobilePhone(Telephone, 'any', { strictMode: false })) {
+        errors.push('Numéro de téléphone invalide.');
+      }
+    
+      // Validate password (example: minimum length of 8 characters)
+      if (!validator.isLength(mot_de_passe, { min: 8 })) {
+        errors.push('Le mot de passe doit comporter au moins 8 caractères.');
+      }
+    
+      // Add more validation checks as needed for other variables
+    
+     
+      // Check if there are any validation errors
+      if (errors.length > 0) {
+        return res.status(400).render("register", {
+          message: "Veuillez remplir correctement tous les champs du formulaire !",
+          errors
+        });
+       
+      }
+    
+    else {
         try {
             db.query('SELECT email,CIN FROM utilisateur WHERE email = ? OR CIN=?', [Email, CIN], async (error, results) => {
                 if (error) {
@@ -479,7 +522,7 @@ exports.register = async (req, res) => {
                     });
                 }
 
-                let hashedPassword = await bcrypt.hash(mot_de_passe, 12);
+                let hashedPassword = await bcrypt.hash(mot_de_passe, process.env.BCRYPT_SECRET);
                 // Création du token JWT pour l'utilisateur connecté
                 const CIN_id = CIN;
                 const type = "user";

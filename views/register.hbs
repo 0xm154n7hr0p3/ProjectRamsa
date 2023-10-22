@@ -60,6 +60,18 @@
             </div>
         {{/if}}
     </div>
+        <div class="text-center" style="margin-top: 10px;" > 
+        {{#if errors}}
+            <div class="centered-message">
+                <h4 class="btn btn-danger btn-icon-split">
+                    <span class="icon text-white-50">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </span>
+                    <span class="text">{{errors}}</span>
+                </h4>
+            </div>
+        {{/if }}
+    </div>
     <div class="container">
 
         <div class="card o-hidden border-0 shadow-lg">

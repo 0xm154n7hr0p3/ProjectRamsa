@@ -177,6 +177,7 @@
                     <h1 class="h3 mb-4 text-gray-800">Statistiques des demandes</h1> </div>
                     <div class="center-container" style="display: flex; justify-content: center; align-items: center;">
                       <form id="date-form" action="/admin/statistiques" method="get">
+                       <input type="hidden" name="_csrf" value="{{csrfToken}}">
                       <div class="form-group row">
                       <div class="col-sm-6 mb-3 mb-sm-0">
                         <label for="start_date"><strong> Date de début:</strong></label>

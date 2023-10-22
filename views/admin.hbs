@@ -75,11 +75,11 @@
                 <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar" style="">
                     <div class="bg-white py-2 collapse-inner rounded">
                         
-                        <a class="collapse-item" href="/statistiques#my">par États de Demandes</a>
+                        <a class="collapse-item" href="/admin/statistiques#my">par États de Demandes</a>
                         
                         
                         
-                    <a class="collapse-item" href="/statistiques#ecole">par Écoles</a></div>
+                    <a class="collapse-item" href="/admin/statistiques#ecole">par Écoles</a></div>
                 </div>
             </li>
 
@@ -210,7 +210,7 @@
                     
                     </div>
                     <form class="user" action="/admin" method="POST">
-                        
+                     <input type="hidden" name="_csrf" value="{{csrfToken}}">
                         
                         
                         
