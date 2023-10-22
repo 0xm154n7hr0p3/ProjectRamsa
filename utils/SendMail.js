@@ -1,5 +1,11 @@
 const nodemailer = require("nodemailer");
 const handlebars = require("handlebars");
+const createDOMPurify = require('dompurify');
+const { JSDOM } = require('jsdom');
+
+// Create DOMPurify
+const window = new JSDOM('').window;
+const DOMPurify = createDOMPurify(window);
 
 async function sendMail(to, url, template) {
   const {
@@ -27,7 +33,7 @@ async function sendMail(to, url, template) {
     URL: url,
     
   };
-  const html = data(replacements);
+  const html = DOMPurify.sanitize(data(replacements));
 
   /* Verify Connection Congif */
   await new Promise((resolve, reject) => {

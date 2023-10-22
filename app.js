@@ -15,6 +15,11 @@ const Handlebars = require("handlebars");
 const hpp = require('hpp');
 const xssMiddleware=require("./utils/xssMiddleware");
 const rateLimit = require('express-rate-limit');
+const csrf = require('csurf');
+
+
+
+var csrfProtect = csrf({ cookie: true })
 
 
 

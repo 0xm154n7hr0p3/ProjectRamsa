@@ -16,6 +16,8 @@ const { JSDOM } = require('jsdom');
 const window = new JSDOM('').window;
 const createDOMPurify = require('dompurify');
 const DOMPurify = createDOMPurify(window);
+const rateLimit = require('express-rate-limit')
+
 
 dotenv.config();
 
