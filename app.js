@@ -43,7 +43,7 @@ db.connect((err)=>{
 
 // Create a rate limiter middleware
 const limiter = rateLimit({
-    windowMs: 30 * 60 * 1000, // 30 minutes
+    windowMs: 3, // 30 minutes
     max: 35, // limit each IP to 3 requests per windowMs
     message:'<h1>429 Too Many Requests</h1><br><hr><strong>Oops ! Vous avez dépassé la limite de fréquence. Veuillez réessayer plus tard.</strong>',
     headers: true,
