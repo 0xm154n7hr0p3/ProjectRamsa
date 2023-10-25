@@ -75,7 +75,8 @@ exports.login = async (req, res) => {
                     const CookieOpt = {
                         expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000),
                         httpOnly: true,
-                        secure: true
+                        secure: true,
+                        sameSite: 'Strict'
                     };
 
                     // Définition du cookie contenant le token JWT
@@ -350,6 +351,7 @@ exports.postAdmin = async (req, res) => {
             status = "refusé";
         }
         if((start_date && end_date) || refuse_reaseon){
+            
         // Mise à jour du statut de la demande (validée ou refusée) dans la base de données
         db.query("UPDATE demandes SET ? where id_demande = ?", [{ date_de_debut: start_date, date_de_fin: end_date, etat_de_demande: status , motif_de_refus:refuse_reaseon }, id_demande], (err, results) => {
             if (err) {
